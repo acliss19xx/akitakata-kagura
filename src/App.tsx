@@ -1,6 +1,7 @@
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import EventList from './pages/EventList';
 import EventDetail from './pages/EventDetail';
+import PastEvents from './pages/PastEvents';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
           <Route path="/" element={<Navigate to="/event_list" replace />} />
           <Route path="/event_list" element={<EventList />} />
           <Route path="/event_detail/:id" element={<EventDetail />} />
+          <Route path="/past_events" element={<PastEvents />} />
         </Routes>
       </div>
     </Router>

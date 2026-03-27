@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronRight } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { useEventData } from '../../useCsvData';
 
 /**
@@ -28,20 +28,10 @@ const formatDateDetails = (dateStr: string) => {
   const weekdays = ['日曜', '月曜', '火曜', '水曜', '木曜', '金曜', '土曜'];
   const weekday = weekdays[date.getDay()];
 
-  // Calculate days remaining
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const eventDate = new Date(dateStr);
-  eventDate.setHours(0, 0, 0, 0);
-
-  const diffTime = eventDate.getTime() - today.getTime();
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
   return {
     month,
     day,
-    weekday,
-    diffDays
+    weekday
   };
 };
 
@@ -81,7 +71,7 @@ const EventImage = ({ src, alt, className }: { src: string, alt: string, classNa
   );
 };
 
-const EventList: React.FC = () => {
+const PastEvents: React.FC = () => {
   const { events, loading, error, refresh } = useEventData();
 
   if (loading) return <div className="flex justify-center items-center h-screen text-kagura-red bg-kagura-black">読み込み中...</div>;
@@ -102,52 +92,54 @@ const EventList: React.FC = () => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const upcomingEvents = events
+  const oneYearAgo = new Date();
+  oneYearAgo.setFullYear(today.getFullYear() - 1);
+  oneYearAgo.setHours(0, 0, 0, 0);
+
+  const pastEvents = events
     .filter(event => {
       const eventDate = new Date(event.date);
-      return !isNaN(eventDate.getTime()) && eventDate >= today;
+      return !isNaN(eventDate.getTime()) && eventDate < today && eventDate >= oneYearAgo;
     })
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   return (
     <div className="bg-kagura-black min-h-screen py-12">
       <div className="container mx-auto px-4 max-w-6xl">
-        {/* Upcoming Events Section */}
-        <h2 className="text-xl font-black text-kagura-text mb-8 tracking-widest flex items-center gap-4">
-          <span className="text-kagura-red">/</span>
-          今後の開催予定
+        <Link to="/event_list" className="inline-flex items-center text-kagura-gold hover:text-yellow-600 mb-8 transition-colors font-bold tracking-widest text-sm">
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          一覧に戻る
+        </Link>
+
+        <h2 className="text-2xl font-black text-kagura-text mb-12 tracking-widest flex items-center gap-4">
+          <span className="text-kagura-muted">/</span>
+          過去の開催実績（直近1年）
         </h2>
-        
-        {upcomingEvents.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-            {upcomingEvents.map((event) => {
-              const { month, day, weekday, diffDays } = formatDateDetails(event.date);
-              const isNear = diffDays !== null && diffDays >= 0 && diffDays <= 7;
+
+        {pastEvents.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {pastEvents.map((event) => {
+              const { month, day, weekday } = formatDateDetails(event.date);
 
               return (
                 <Link
                   key={event.id}
                   to={`/event_detail/${event.id}`}
-                  className="group block bg-kagura-card border border-white/20 hover:border-kagura-red/50 hover:shadow-[0_0_30px_rgba(185,28,28,0.2)] transition-all duration-500"
+                  className="group block bg-kagura-card border border-white/20 hover:border-kagura-red/50 hover:shadow-[0_0_30px_rgba(185,28,28,0.2)] transition-all duration-500 opacity-80 grayscale-[0.2] hover:opacity-100 hover:grayscale-0"
                 >
                   {/* ev-date */}
                   <div className="p-4 border-b border-white/5 flex items-baseline gap-1 font-black">
                     <span className="text-sm text-kagura-muted">{month}月</span>
-                    <span className="text-3xl text-kagura-red">{day}</span>
+                    <span className="text-3xl text-kagura-muted">{day}</span>
                     <span className="text-sm text-kagura-muted">日</span>
                     <span className="text-sm ml-1 text-kagura-muted">{weekday}</span>
-
-                    {diffDays !== null && diffDays >= 0 && (
-                      <span className={`ml-auto flex items-center gap-1 text-[10px] px-3 py-1 rounded-sm tracking-tighter ${isNear ? 'bg-kagura-red text-white shadow-[0_0_10px_rgba(185,28,28,0.5)]' : 'bg-white/10 text-kagura-muted'}`}>
-                        <span>あと</span>
-                        <span className="text-sm font-black">{diffDays}</span>
-                        <span>日</span>
-                      </span>
-                    )}
+                    <span className="ml-auto text-[10px] px-2 py-0.5 bg-white/5 text-kagura-muted rounded-sm">
+                      終了
+                    </span>
                   </div>
 
                   {/* ev-msato */}
-                  <div className="px-4 py-2 bg-white/5 text-[11px] font-bold tracking-widest border-b border-white/5 uppercase text-kagura-gold">
+                  <div className="px-4 py-2 bg-white/5 text-[11px] font-bold tracking-widest border-b border-white/5 uppercase text-kagura-muted">
                     {event.groupName}
                   </div>
 
@@ -161,13 +153,13 @@ const EventList: React.FC = () => {
                       <EventImage
                         src={getDirectDriveUrl(event.headerImageUrl || event.imageUrl[0] || '')}
                         alt={event.groupName}
-                        className="w-full h-full group-hover:scale-110 transition-transform duration-700 opacity-80 group-hover:opacity-100"
+                        className="w-full h-full group-hover:scale-110 transition-transform duration-700 opacity-60 group-hover:opacity-100"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-kagura-black/60 to-transparent" />
                     </div>
 
                     <p className="text-xs font-medium text-kagura-muted truncate flex items-center gap-2">
-                      <span className="w-1 h-1 rounded-full bg-kagura-red"></span>
+                      <span className="w-1 h-1 rounded-full bg-kagura-muted"></span>
                       会場：{event.location}
                     </p>
                   </div>
@@ -176,22 +168,11 @@ const EventList: React.FC = () => {
             })}
           </div>
         ) : (
-          <p className="text-kagura-muted mb-12">現在、予定されているイベントはありません。</p>
+          <p className="text-kagura-muted">過去1年間の開催実績はありません。</p>
         )}
-
-        {/* Link to Past Events Page */}
-        <div className="flex justify-center mt-16">
-          <Link
-            to="/past_events"
-            className="group flex items-center gap-3 px-8 py-4 bg-white/5 border border-white/10 hover:border-kagura-gold/50 hover:bg-white/10 transition-all duration-300 rounded-sm text-kagura-gold font-bold tracking-widest uppercase"
-          >
-            過去の開催実績を見る
-            <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-          </Link>
-        </div>
       </div>
     </div>
   );
 };
 
-export default EventList;
+export default PastEvents;
