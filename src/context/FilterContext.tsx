@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
 interface FilterContextType {
   selectedGroup: string;
@@ -10,9 +10,27 @@ interface FilterContextType {
 
 const FilterContext = createContext<FilterContextType | undefined>(undefined);
 
+const STORAGE_KEY_GROUP = 'kagura_selected_group';
+const STORAGE_KEY_MONTH = 'kagura_selected_month';
+
 export const FilterProvider = ({ children }: { children: ReactNode }) => {
-  const [selectedGroup, setSelectedGroup] = useState('');
-  const [selectedMonth, setSelectedMonth] = useState('');
+  // Initialize state from localStorage if available
+  const [selectedGroup, setSelectedGroup] = useState(() => {
+    return localStorage.getItem(STORAGE_KEY_GROUP) || '';
+  });
+  
+  const [selectedMonth, setSelectedMonth] = useState(() => {
+    return localStorage.getItem(STORAGE_KEY_MONTH) || '';
+  });
+
+  // Persist state to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY_GROUP, selectedGroup);
+  }, [selectedGroup]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY_MONTH, selectedMonth);
+  }, [selectedMonth]);
 
   const resetFilters = () => {
     setSelectedGroup('');
