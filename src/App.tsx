@@ -60,8 +60,8 @@ function Navigation() {
               安芸高田 神楽情報
             </h1>
           </Link>
-          
-          <button 
+
+          <button
             onClick={() => setIsOpen(true)}
             className="p-2 text-kagura-gold hover:bg-white/5 rounded-sm transition-colors flex items-center gap-2 border border-kagura-gold/20"
           >
@@ -72,7 +72,7 @@ function Navigation() {
       </nav>
 
       {/* Hamburger Menu / Filter Drawer */}
-      <div 
+      <div
         className={`fixed inset-0 z-50 transition-transform duration-500 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
       >
         <div className="absolute inset-0 bg-kagura-black/80 backdrop-blur-sm" onClick={() => setIsOpen(false)} />
@@ -93,7 +93,10 @@ function Navigation() {
               <label className="block text-xs font-bold text-kagura-muted tracking-widest mb-4 uppercase">年月で絞り込む（今月以降）</label>
               <select 
                 value={selectedMonth}
-                onChange={(e) => setSelectedMonth(e.target.value)}
+                onChange={(e) => {
+                  setSelectedMonth(e.target.value);
+                  setIsOpen(false); // Close on month selection for convenience
+                }}
                 className="w-full bg-kagura-black border border-white/10 rounded-sm p-4 text-kagura-text focus:border-kagura-red outline-none transition-colors appearance-none cursor-pointer"
               >
                 <option value="">すべての月</option>
@@ -140,27 +143,23 @@ function Navigation() {
                 })}
               </div>
             </div>
-          </div>
+            </div>
 
-          <div className="p-8 bg-kagura-black/40 border-t border-white/5 space-y-4">
+            <div className="p-8 bg-kagura-black/40 border-t border-white/5">
             <button 
               onClick={() => {
                 resetFilters();
+                setIsOpen(false);
               }}
-              className="w-full py-3 border border-kagura-muted/30 text-kagura-muted hover:text-kagura-text hover:border-kagura-text transition-all flex items-center justify-center gap-2 text-xs font-bold tracking-widest"
+              className="w-full py-4 border border-kagura-muted/30 text-kagura-muted hover:text-kagura-text hover:border-kagura-text transition-all flex items-center justify-center gap-2 text-xs font-bold tracking-widest"
             >
               <RotateCcw className="w-3 h-3" />
-              条件をリセット
+              条件をすべてリセット
             </button>
-            <button 
-              onClick={() => setIsOpen(false)}
-              className="w-full py-4 bg-kagura-red text-white font-black tracking-widest shadow-xl shadow-kagura-red/20 hover:bg-red-800 transition-all active:scale-95"
-            >
-              検索を適用する
-            </button>
-          </div>
-        </div>
-      </div>
+            </div>
+            </div>
+            </div>
+
     </>
   );
 }
