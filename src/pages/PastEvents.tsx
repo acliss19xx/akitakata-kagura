@@ -1,17 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, FilterX } from 'lucide-react';
 import { useEventData } from '../../useCsvData';
+import { useFilter } from '../context/FilterContext';
 
 /**
  * Converts Google Drive sharing links to direct image links
  */
-const getDirectDriveUrl = (url: string): string => {
+const getDirectDriveUrl = (url: string, size: number = 1000): string => {
   if (!url) return '';
   const match = url.match(/(?:\/d\/|id=)([\w-]+)/);
   if (match && (url.includes('drive.google.com') || url.includes('docs.google.com'))) {
     const fileId = match[1];
-    return `https://drive.google.com/thumbnail?id=${fileId}&sz=w800`;
+    return `https://drive.google.com/thumbnail?id=${fileId}&sz=w${size}`;
   }
   return url;
 };
@@ -73,6 +74,36 @@ const EventImage = ({ src, alt, className }: { src: string, alt: string, classNa
 
 const PastEvents: React.FC = () => {
   const { events, loading, error, refresh } = useEventData();
+  const { selectedGroup, selectedMonth, resetFilters } = useFilter();
+
+  const filteredPastEvents = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const oneYearAgo = new Date();
+    oneYearAgo.setFullYear(today.getFullYear() - 1);
+    oneYearAgo.setHours(0, 0, 0, 0);
+
+    return events
+      .filter(event => {
+        const eventDate = new Date(event.date);
+        const isPast = !isNaN(eventDate.getTime()) && eventDate < today && eventDate >= oneYearAgo;
+        
+        if (!isPast) return false;
+
+        // Apply group filter
+        if (selectedGroup && event.groupName !== selectedGroup) return false;
+
+        // Apply month filter
+        if (selectedMonth) {
+          const yearMonth = `${eventDate.getFullYear()}-${String(eventDate.getMonth() + 1).padStart(2, '0')}`;
+          if (yearMonth !== selectedMonth) return false;
+        }
+
+        return true;
+      })
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [events, selectedGroup, selectedMonth]);
 
   if (loading) return <div className="flex justify-center items-center h-screen text-kagura-red bg-kagura-black">読み込み中...</div>;
   if (error) {
@@ -89,20 +120,6 @@ const PastEvents: React.FC = () => {
     );
   }
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const oneYearAgo = new Date();
-  oneYearAgo.setFullYear(today.getFullYear() - 1);
-  oneYearAgo.setHours(0, 0, 0, 0);
-
-  const pastEvents = events
-    .filter(event => {
-      const eventDate = new Date(event.date);
-      return !isNaN(eventDate.getTime()) && eventDate < today && eventDate >= oneYearAgo;
-    })
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
   return (
     <div className="bg-kagura-black min-h-screen py-12">
       <div className="container mx-auto px-4 max-w-6xl">
@@ -111,14 +128,37 @@ const PastEvents: React.FC = () => {
           一覧に戻る
         </Link>
 
+        {/* Active Filters Display */}
+        {(selectedGroup || selectedMonth) && (
+          <div className="mb-8 flex flex-wrap items-center gap-3 bg-white/5 p-4 rounded-sm border border-kagura-red/20">
+            <span className="text-xs font-bold text-kagura-muted tracking-widest uppercase">検索条件:</span>
+            {selectedMonth && (
+              <span className="px-3 py-1 bg-kagura-red/20 text-kagura-red text-xs font-bold rounded-full border border-kagura-red/30">
+                {selectedMonth.replace('-', '年')}月
+              </span>
+            )}
+            {selectedGroup && (
+              <span className="px-3 py-1 bg-kagura-gold/20 text-kagura-gold text-xs font-bold rounded-full border border-kagura-gold/30">
+                {selectedGroup}
+              </span>
+            )}
+            <button 
+              onClick={resetFilters}
+              className="ml-auto text-xs text-kagura-muted hover:text-white underline underline-offset-4"
+            >
+              解除する
+            </button>
+          </div>
+        )}
+
         <h2 className="text-2xl font-black text-kagura-text mb-12 tracking-widest flex items-center gap-4">
           <span className="text-kagura-muted">/</span>
           過去の開催実績（直近1年）
         </h2>
 
-        {pastEvents.length > 0 ? (
+        {filteredPastEvents.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {pastEvents.map((event) => {
+            {filteredPastEvents.map((event) => {
               const { month, day, weekday } = formatDateDetails(event.date);
 
               return (
@@ -168,7 +208,10 @@ const PastEvents: React.FC = () => {
             })}
           </div>
         ) : (
-          <p className="text-kagura-muted">過去1年間の開催実績はありません。</p>
+          <div className="flex flex-col items-center justify-center py-20 bg-white/5 border border-dashed border-white/10 rounded-sm mb-12">
+            <FilterX className="w-12 h-12 text-kagura-muted mb-4 opacity-20" />
+            <p className="text-kagura-muted font-bold tracking-widest">条件に一致する実績はありません</p>
+          </div>
         )}
       </div>
     </div>

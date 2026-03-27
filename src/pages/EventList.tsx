@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, FilterX } from 'lucide-react';
 import { useEventData } from '../../useCsvData';
+import { useFilter } from '../context/FilterContext';
 
 /**
  * Converts Google Drive sharing links to direct image links
@@ -83,6 +84,32 @@ const EventImage = ({ src, alt, className }: { src: string, alt: string, classNa
 
 const EventList: React.FC = () => {
   const { events, loading, error, refresh } = useEventData();
+  const { selectedGroup, selectedMonth, resetFilters } = useFilter();
+
+  const filteredUpcomingEvents = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    return events
+      .filter(event => {
+        const eventDate = new Date(event.date);
+        const isUpcoming = !isNaN(eventDate.getTime()) && eventDate >= today;
+        
+        if (!isUpcoming) return false;
+
+        // Apply group filter
+        if (selectedGroup && event.groupName !== selectedGroup) return false;
+
+        // Apply month filter
+        if (selectedMonth) {
+          const yearMonth = `${eventDate.getFullYear()}-${String(eventDate.getMonth() + 1).padStart(2, '0')}`;
+          if (yearMonth !== selectedMonth) return false;
+        }
+
+        return true;
+      })
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  }, [events, selectedGroup, selectedMonth]);
 
   if (loading) return <div className="flex justify-center items-center h-screen text-kagura-red bg-kagura-black">読み込み中...</div>;
   if (error) {
@@ -99,28 +126,41 @@ const EventList: React.FC = () => {
     );
   }
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const upcomingEvents = events
-    .filter(event => {
-      const eventDate = new Date(event.date);
-      return !isNaN(eventDate.getTime()) && eventDate >= today;
-    })
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-
   return (
     <div className="bg-kagura-black min-h-screen py-12">
       <div className="container mx-auto px-4 max-w-6xl">
+        {/* Active Filters Display */}
+        {(selectedGroup || selectedMonth) && (
+          <div className="mb-8 flex flex-wrap items-center gap-3 bg-white/5 p-4 rounded-sm border border-kagura-red/20">
+            <span className="text-xs font-bold text-kagura-muted tracking-widest uppercase">検索条件:</span>
+            {selectedMonth && (
+              <span className="px-3 py-1 bg-kagura-red/20 text-kagura-red text-xs font-bold rounded-full border border-kagura-red/30">
+                {selectedMonth.replace('-', '年')}月
+              </span>
+            )}
+            {selectedGroup && (
+              <span className="px-3 py-1 bg-kagura-gold/20 text-kagura-gold text-xs font-bold rounded-full border border-kagura-gold/30">
+                {selectedGroup}
+              </span>
+            )}
+            <button 
+              onClick={resetFilters}
+              className="ml-auto text-xs text-kagura-muted hover:text-white underline underline-offset-4"
+            >
+              解除する
+            </button>
+          </div>
+        )}
+
         {/* Upcoming Events Section */}
         <h2 className="text-xl font-black text-kagura-text mb-8 tracking-widest flex items-center gap-4">
           <span className="text-kagura-red">/</span>
           今後の開催予定
         </h2>
         
-        {upcomingEvents.length > 0 ? (
+        {filteredUpcomingEvents.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-            {upcomingEvents.map((event) => {
+            {filteredUpcomingEvents.map((event) => {
               const { month, day, weekday, diffDays } = formatDateDetails(event.date);
               const isNear = diffDays !== null && diffDays >= 0 && diffDays <= 7;
 
@@ -176,7 +216,10 @@ const EventList: React.FC = () => {
             })}
           </div>
         ) : (
-          <p className="text-kagura-muted mb-12">現在、予定されているイベントはありません。</p>
+          <div className="flex flex-col items-center justify-center py-20 bg-white/5 border border-dashed border-white/10 rounded-sm mb-12">
+            <FilterX className="w-12 h-12 text-kagura-muted mb-4 opacity-20" />
+            <p className="text-kagura-muted font-bold tracking-widest">条件に一致するイベントはありません</p>
+          </div>
         )}
 
         {/* Link to Past Events Page */}
