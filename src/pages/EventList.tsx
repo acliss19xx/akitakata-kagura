@@ -59,16 +59,24 @@ const EventImage = ({ src, alt, className }: { src: string, alt: string, classNa
   }
 
   return (
-    <div
-      className={className}
-      style={{
-        backgroundImage: `url(${src})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center'
-      }}
-      role="img"
-      aria-label={alt}
-    />
+    <>
+      <img
+        src={src}
+        alt={alt}
+        className="hidden"
+        onError={() => setError(true)}
+      />
+      <div
+        className={className}
+        style={{
+          backgroundImage: `url(${src})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        }}
+        role="img"
+        aria-label={alt}
+      />
+    </>
   );
 };
 
