@@ -1,1 +1,41 @@
 @import "tailwindcss";
+
+@theme {
+  --color-kagura-black: #0a0a0a;
+  --color-kagura-dark: #121212;
+  --color-kagura-card: #1a1a1a;
+  --color-kagura-red: #b91c1c;
+  --color-kagura-gold: #b45309;
+  --color-kagura-text: #e5e5e5;
+  --color-kagura-muted: #9ca3af;
+}
+
+:root {
+  background-color: var(--color-kagura-black);
+  color: var(--color-kagura-text);
+}
+
+body {
+  margin: 0;
+  font-family: 'Noto Sans JP', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbar for dark theme */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-kagura-black);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-kagura-red);
+}

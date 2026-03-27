@@ -5,10 +5,12 @@ import EventDetail from './pages/EventDetail';
 function App() {
   return (
     <Router>
-      <div className="min-h-screen bg-gray-50">
-        <nav className="bg-white shadow-sm py-4 mb-6">
+      <div className="min-h-screen bg-kagura-black text-kagura-text">
+        <nav className="bg-kagura-dark border-b border-kagura-red/30 py-6 mb-6">
           <div className="container mx-auto px-4">
-            <h1 className="text-xl font-bold text-indigo-600">神楽イベント情報</h1>
+            <h1 className="text-2xl font-black text-kagura-red tracking-widest text-center md:text-left">
+              安芸高田 神楽イベント情報
+            </h1>
           </div>
         </nav>
         
