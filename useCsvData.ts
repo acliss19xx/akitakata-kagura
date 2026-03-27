@@ -11,7 +11,7 @@ import { Event } from './src/types/event';
 const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTu7GhrO_TIqc3O1Rqc99XDiYvxRgJMpmRMAs_Whg3A3M12nsxkDtVg_BzNJJxgFrvPvJ8Rdydzr3-P/pub?gid=1424514696&single=true&output=csv";
 
 const CACHE_KEY = 'cached_events_csv_data';
-const CACHE_EXPIRATION = 10 * 60 * 1000; // 10 minutes
+const CACHE_EXPIRATION = 1 * 60 * 1000; // 1 minute (test mode)
 const MAX_AUTO_RETRIES = 5;
 
 /**
