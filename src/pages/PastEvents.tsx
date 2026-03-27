@@ -74,7 +74,7 @@ const EventImage = ({ src, alt, className }: { src: string, alt: string, classNa
 
 const PastEvents: React.FC = () => {
   const { events, loading, error, refresh } = useEventData();
-  const { selectedGroup, selectedMonth, resetFilters } = useFilter();
+  const { selectedGroups, selectedMonth, resetFilters } = useFilter();
 
   const filteredPastEvents = useMemo(() => {
     const today = new Date();
@@ -91,8 +91,8 @@ const PastEvents: React.FC = () => {
         
         if (!isPast) return false;
 
-        // Apply group filter
-        if (selectedGroup && event.groupName !== selectedGroup) return false;
+        // Apply multiple group filter
+        if (selectedGroups.length > 0 && !selectedGroups.includes(event.groupName)) return false;
 
         // Apply month filter
         if (selectedMonth) {
@@ -103,7 +103,7 @@ const PastEvents: React.FC = () => {
         return true;
       })
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, [events, selectedGroup, selectedMonth]);
+  }, [events, selectedGroups, selectedMonth]);
 
   if (loading) return <div className="flex justify-center items-center h-screen text-kagura-red bg-kagura-black">読み込み中...</div>;
   if (error) {
@@ -129,7 +129,7 @@ const PastEvents: React.FC = () => {
         </Link>
 
         {/* Active Filters Display */}
-        {(selectedGroup || selectedMonth) && (
+        {(selectedGroups.length > 0 || selectedMonth) && (
           <div className="mb-8 flex flex-wrap items-center gap-3 bg-white/5 p-4 rounded-sm border border-kagura-red/20">
             <span className="text-xs font-bold text-kagura-muted tracking-widest uppercase">検索条件:</span>
             {selectedMonth && (
@@ -137,11 +137,11 @@ const PastEvents: React.FC = () => {
                 {selectedMonth.replace('-', '年')}月
               </span>
             )}
-            {selectedGroup && (
-              <span className="px-3 py-1 bg-kagura-gold/20 text-kagura-gold text-xs font-bold rounded-full border border-kagura-gold/30">
-                {selectedGroup}
+            {selectedGroups.map(group => (
+              <span key={group} className="px-3 py-1 bg-kagura-gold/20 text-kagura-gold text-xs font-bold rounded-full border border-kagura-gold/30">
+                {group}
               </span>
-            )}
+            ))}
             <button 
               onClick={resetFilters}
               className="ml-auto text-xs text-kagura-muted hover:text-white underline underline-offset-4"
