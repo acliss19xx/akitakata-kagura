@@ -127,7 +127,7 @@ const EventList: React.FC = () => {
       <Link
         key={event.id}
         to={`/event_detail/${event.id}`}
-        className={`group block bg-kagura-card border border-white/5 hover:border-kagura-red/50 hover:shadow-[0_0_30px_rgba(185,28,28,0.2)] transition-all duration-500 ${isPast ? 'opacity-70 grayscale-[0.3]' : ''}`}
+        className={`group block bg-kagura-card border border-white/20 hover:border-kagura-red/50 hover:shadow-[0_0_30px_rgba(185,28,28,0.2)] transition-all duration-500 ${isPast ? 'opacity-70 grayscale-[0.3]' : ''}`}
       >
         {/* ev-date */}
         <div className="p-4 border-b border-white/5 flex items-baseline gap-1 font-black">
