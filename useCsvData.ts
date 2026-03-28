@@ -108,7 +108,7 @@ export const useEventData = () => {
           if (parsed.data && Array.isArray(parsed.data)) {
             const fetchedData = parsed.data
               .map(mapEventData)
-              .filter(e => (e.isPublished === "はい" || e.isPublished === "true" || e.isPublished === true) && e.groupName);
+              .filter(e => (e.isPublished === "はい" || e.isPublished === "true") && e.groupName);
 
             if (fetchedData.length > 0) {
               sessionStorage.setItem(CACHE_KEY, JSON.stringify({
