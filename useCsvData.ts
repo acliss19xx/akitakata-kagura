@@ -4,15 +4,13 @@ import Papa from 'papaparse';
 import { Event } from './src/types/event';
 
 /**
- * 提供された「ウェブに公開」用URL
- * このURL（2PACX-形式）は認証を必要とせず、CORS制限も回避しやすいため、
- * プロキシを通さずに直接取得を試みます。
+ * GAS経由で更新されるリポジトリ内のCSVファイルを使用します
  */
-const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTu7GhrO_TIqc3O1Rqc99XDiYvxRgJMpmRMAs_Whg3A3M12nsxkDtVg_BzNJJxgFrvPvJ8Rdydzr3-P/pub?gid=1424514696&single=true&output=csv";
+const CSV_URL = "./data/event_list.csv";
 
-const CACHE_KEY = 'cached_events_csv_data';
+const CACHE_KEY = 'cached_events_csv_data_v2';
 const CACHE_EXPIRATION = 1 * 60 * 1000; // 1 minute (test mode)
-const MAX_AUTO_RETRIES = 5;
+const MAX_AUTO_RETRIES = 3;
 
 /**
  * Splits a comma-separated string into a trimmed array of non-empty strings
@@ -96,20 +94,21 @@ export const useEventData = () => {
       let lastError = null;
       for (let attempt = 0; attempt <= MAX_AUTO_RETRIES; attempt++) {
         try {
-          console.log(`Fetching CSV data (attempt ${attempt + 1}/${MAX_AUTO_RETRIES + 1})...`);
+          console.log(`Fetching local CSV data (attempt ${attempt + 1})...`);
 
-          const response = await axios.get(CSV_URL+'&t='+new Date().getTime());
+          // キャッシュバスティングのためにタイムスタンプを付与
+          const response = await axios.get(`${CSV_URL}?t=${new Date().getTime()}`);
 
-          if (typeof response.data === 'string' && response.data.includes('ServiceLogin')) {
-            throw new Error('Google Sheets still redirecting to Login. Please check "Publish to web" settings.');
-          }
-
-          const parsed = Papa.parse(response.data, { header: true, skipEmptyLines: true });
+          const parsed = Papa.parse(response.data, { 
+            header: true, 
+            skipEmptyLines: true,
+            dynamicTyping: false
+          });
 
           if (parsed.data && Array.isArray(parsed.data)) {
             const fetchedData = parsed.data
               .map(mapEventData)
-              .filter(e => (e.isPublished === "はい" || e.isPublished === "true") && e.groupName);
+              .filter(e => (e.isPublished === "はい" || e.isPublished === "true" || e.isPublished === true) && e.groupName);
 
             if (fetchedData.length > 0) {
               sessionStorage.setItem(CACHE_KEY, JSON.stringify({
@@ -121,7 +120,7 @@ export const useEventData = () => {
               setLoading(false);
               return;
             } else {
-              throw new Error("表示できるイベントがありません。CSVの中身が空か、[公開]列が[はい]になっていない可能性があります。");
+              throw new Error("表示できるイベントがありません。CSVの中身を確認してください。");
             }
           } else {
             throw new Error("CSVの解析に失敗しました。");
@@ -135,7 +134,7 @@ export const useEventData = () => {
         }
       }
 
-      setError(`CSVデータの取得に失敗しました。${lastError?.message || ""}`);
+      setError(`データの取得に失敗しました。${lastError?.message || ""}`);
       setLoading(false);
     };
 
