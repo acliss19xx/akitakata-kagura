@@ -91,7 +91,7 @@ function Navigation() {
             {/* Month Filter */}
             <div>
               <label className="block text-xs font-bold text-kagura-muted tracking-widest mb-4 uppercase">年月で絞り込む（今月以降）</label>
-              <select 
+              <select
                 value={selectedMonth}
                 onChange={(e) => {
                   setSelectedMonth(e.target.value);
@@ -111,7 +111,7 @@ function Navigation() {
               <div className="flex justify-between items-center mb-4">
                 <label className="text-xs font-bold text-kagura-muted tracking-widest uppercase">神楽団（複数選択可）</label>
                 {selectedGroups.length > 0 && (
-                  <button 
+                  <button
                     onClick={() => setSelectedGroups([])}
                     className="text-[10px] text-kagura-gold hover:underline font-bold"
                   >
@@ -127,8 +127,8 @@ function Navigation() {
                       key={group}
                       onClick={() => toggleGroup(group)}
                       className={`flex items-center justify-between p-3 rounded-sm border transition-all duration-300 ${
-                        isSelected 
-                          ? 'bg-kagura-red/20 border-kagura-red/50 text-kagura-text' 
+                        isSelected
+                          ? 'bg-kagura-red/20 border-kagura-red/50 text-kagura-text'
                           : 'bg-white/5 border-white/5 text-kagura-muted hover:bg-white/10'
                       }`}
                     >
@@ -146,7 +146,7 @@ function Navigation() {
             </div>
 
             <div className="p-8 bg-kagura-black/40 border-t border-white/5">
-            <button 
+            <button
               onClick={() => {
                 resetFilters();
                 setIsOpen(false);
