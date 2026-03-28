@@ -8,8 +8,6 @@ import { Event } from './src/types/event';
  */
 const CSV_URL = "./data/event_list.csv";
 
-const CACHE_KEY = 'cached_events_csv_data_v2';
-const CACHE_EXPIRATION = 1 * 60 * 1000; // 1 minute (test mode)
 const MAX_AUTO_RETRIES = 3;
 
 /**
@@ -77,26 +75,12 @@ export const useEventData = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (retryCount === 0) {
-        const cached = sessionStorage.getItem(CACHE_KEY);
-        if (cached) {
-          const { data, timestamp } = JSON.parse(cached);
-          if (Date.now() - timestamp < CACHE_EXPIRATION) {
-            setEvents(data);
-            setLoading(false);
-            return;
-          }
-        }
-      } else {
-        sessionStorage.removeItem(CACHE_KEY);
-      }
-
       let lastError = null;
       for (let attempt = 0; attempt <= MAX_AUTO_RETRIES; attempt++) {
         try {
           console.log(`Fetching local CSV data (attempt ${attempt + 1})...`);
 
-          // キャッシュバスティングのためにタイムスタンプを付与
+          // キャッシュバスティングのためにタイムスタンプを付与して常に最新を取得
           const response = await axios.get(`${CSV_URL}?t=${new Date().getTime()}`);
 
           const parsed = Papa.parse(response.data, { 
@@ -111,10 +95,6 @@ export const useEventData = () => {
               .filter(e => (e.isPublished === "はい" || e.isPublished === "true") && e.groupName);
 
             if (fetchedData.length > 0) {
-              sessionStorage.setItem(CACHE_KEY, JSON.stringify({
-                data: fetchedData,
-                timestamp: Date.now()
-              }));
               setEvents(fetchedData);
               setError(null);
               setLoading(false);
