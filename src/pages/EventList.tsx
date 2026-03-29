@@ -22,8 +22,9 @@ const getDirectDriveUrl = (url: string): string => {
  */
 const formatDateDetails = (dateStr: string) => {
   const date = new Date(dateStr);
-  if (isNaN(date.getTime())) return { month: '-', day: '-', weekday: '-', diffDays: null };
+  if (isNaN(date.getTime())) return { year: '-', month: '-', day: '-', weekday: '-', diffDays: null };
 
+  const year = date.getFullYear().toString();
   const month = (date.getMonth() + 1).toString();
   const day = date.getDate().toString();
   const weekdays = ['日曜', '月曜', '火曜', '水曜', '木曜', '金曜', '土曜'];
@@ -39,6 +40,7 @@ const formatDateDetails = (dateStr: string) => {
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
   return {
+    year,
     month,
     day,
     weekday,
@@ -161,7 +163,7 @@ const EventList: React.FC = () => {
         {filteredUpcomingEvents.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
             {filteredUpcomingEvents.map((event) => {
-              const { month, day, weekday, diffDays } = formatDateDetails(event.date);
+              const { year, month, day, weekday, diffDays } = formatDateDetails(event.date);
               const isNear = diffDays !== null && diffDays >= 0 && diffDays <= 7;
 
               return (
@@ -172,6 +174,7 @@ const EventList: React.FC = () => {
                 >
                   {/* ev-date */}
                   <div className="p-4 border-b border-white/5 flex items-baseline gap-1 font-black">
+                    <span className="text-[10px] text-kagura-muted whitespace-nowrap">{year}年</span>
                     <span className="text-sm text-kagura-muted">{month}月</span>
                     <span className="text-3xl text-kagura-red">{day}</span>
                     <span className="text-sm text-kagura-muted">日</span>

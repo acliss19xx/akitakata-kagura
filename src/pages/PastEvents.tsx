@@ -5,71 +5,19 @@ import { useEventData } from '../../useCsvData';
 import { useFilter } from '../context/FilterContext';
 
 /**
- * Converts Google Drive sharing links to direct image links
- */
-const getDirectDriveUrl = (url: string, size: number = 1000): string => {
-  if (!url) return '';
-  const match = url.match(/(?:\/d\/|id=)([\w-]+)/);
-  if (match && (url.includes('drive.google.com') || url.includes('docs.google.com'))) {
-    const fileId = match[1];
-    return `https://drive.google.com/thumbnail?id=${fileId}&sz=w${size}`;
-  }
-  return url;
-};
-
-/**
  * Formats date for the specific design
  */
-const formatDateDetails = (dateStr: string) => {
+const formatFullDate = (dateStr: string) => {
   const date = new Date(dateStr);
-  if (isNaN(date.getTime())) return { month: '-', day: '-', weekday: '-', diffDays: null };
+  if (isNaN(date.getTime())) return dateStr;
 
+  const year = date.getFullYear();
   const month = (date.getMonth() + 1).toString();
   const day = date.getDate().toString();
-  const weekdays = ['日曜', '月曜', '火曜', '水曜', '木曜', '金曜', '土曜'];
+  const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
   const weekday = weekdays[date.getDay()];
 
-  return {
-    month,
-    day,
-    weekday
-  };
-};
-
-/**
- * Image component with error handling
- */
-const EventImage = ({ src, alt, className }: { src: string, alt: string, className: string }) => {
-  const [error, setError] = useState(false);
-
-  if (error || !src) {
-    return (
-      <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gray-200">
-        No Image
-      </div>
-    );
-  }
-
-  return (
-    <>
-      <img
-        src={src}
-        alt={alt}
-        className="hidden"
-        onError={() => setError(true)}
-      />
-      <div
-        className={className}
-        style={{
-          backgroundImage: `url(${src})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center'
-        }}
-        role="img"
-        aria-label={alt}
-      />
-    </>
-  );
+  return `${year}年${month}月${day}日(${weekday})`;
 };
 
 const PastEvents: React.FC = () => {
@@ -157,55 +105,36 @@ const PastEvents: React.FC = () => {
         </h2>
 
         {filteredPastEvents.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredPastEvents.map((event) => {
-              const { month, day, weekday } = formatDateDetails(event.date);
-
-              return (
-                <Link
-                  key={event.id}
-                  to={`/event_detail/${event.id}`}
-                  className="group block bg-kagura-card border border-white/20 hover:border-kagura-red/50 hover:shadow-[0_0_30px_rgba(185,28,28,0.2)] transition-all duration-500 opacity-80 grayscale-[0.2] hover:opacity-100 hover:grayscale-0"
-                >
-                  {/* ev-date */}
-                  <div className="p-4 border-b border-white/5 flex items-baseline gap-1 font-black">
-                    <span className="text-sm text-kagura-muted">{month}月</span>
-                    <span className="text-3xl text-kagura-muted">{day}</span>
-                    <span className="text-sm text-kagura-muted">日</span>
-                    <span className="text-sm ml-1 text-kagura-muted">{weekday}</span>
-                    <span className="ml-auto text-[10px] px-2 py-0.5 bg-white/5 text-kagura-muted rounded-sm">
-                      終了
-                    </span>
-                  </div>
-
-                  {/* ev-msato */}
-                  <div className="px-4 py-2 bg-white/5 text-[11px] font-bold tracking-widest border-b border-white/5 uppercase text-kagura-muted">
-                    {event.groupName}
-                  </div>
-
-                  {/* ev-dsc */}
-                  <div className="p-4 flex flex-col h-full">
-                    <p className="font-bold text-kagura-text mb-4 line-clamp-2 min-h-[3rem] text-base leading-snug group-hover:text-white transition-colors">
-                      {event.eventName}
-                    </p>
-
-                    <div className="relative aspect-video overflow-hidden bg-kagura-black mb-4 border border-white/5">
-                      <EventImage
-                        src={getDirectDriveUrl(event.headerImageUrl || event.imageUrl[0] || '')}
-                        alt={event.groupName}
-                        className="w-full h-full group-hover:scale-110 transition-transform duration-700 opacity-60 group-hover:opacity-100"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-kagura-black/60 to-transparent" />
-                    </div>
-
-                    <p className="text-xs font-medium text-kagura-muted truncate flex items-center gap-2">
-                      <span className="w-1 h-1 rounded-full bg-kagura-muted"></span>
-                      会場：{event.location}
-                    </p>
-                  </div>
-                </Link>
-              );
-            })}
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse border-t border-white/20">
+              <thead>
+                <tr className="bg-white/5 text-kagura-gold text-xs tracking-widest uppercase">
+                  <th className="py-4 px-4 font-black border-b border-white/20">開催日時</th>
+                  <th className="py-4 px-4 font-black border-b border-white/20">イベント名</th>
+                  <th className="py-4 px-4 font-black border-b border-white/20">神楽団</th>
+                </tr>
+              </thead>
+              <tbody className="text-kagura-text">
+                {filteredPastEvents.map((event) => (
+                  <tr key={event.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                    <td className="py-4 px-4 text-sm font-medium">
+                      <div className="flex items-center gap-2">
+                        <span className="text-kagura-muted whitespace-nowrap">{formatFullDate(event.date)}</span>
+                        <span className="text-kagura-muted/50 text-xs">{event.time}</span>
+                      </div>
+                    </td>
+                    <td className="py-4 px-4 font-bold text-base">
+                      <Link to={`/event_detail/${event.id}`} className="hover:text-kagura-gold transition-colors">
+                        {event.eventName}
+                      </Link>
+                    </td>
+                    <td className="py-4 px-4 text-sm text-kagura-muted">
+                      {event.groupName}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-20 bg-white/5 border border-dashed border-white/10 rounded-sm mb-12">
