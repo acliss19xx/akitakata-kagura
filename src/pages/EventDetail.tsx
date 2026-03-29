@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useParams, Link, useLocation } from 'react-router-dom';
 import { Calendar, MapPin, Clock, Info, Banknote, ClipboardList, ArrowLeft, X, Users, Phone } from 'lucide-react';
 import { useEventData } from '../../useCsvData';
@@ -23,6 +23,15 @@ const EventDetail: React.FC = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const event = events.find(e => String(e.id) === id);
+
+  // Determine if the event is in the past
+  const isPast = useMemo(() => {
+    if (!event) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const eventDate = new Date(event.date);
+    return !isNaN(eventDate.getTime()) && eventDate < today;
+  }, [event]);
 
   // Determine back link destination
   const isFromPast = location.pathname.includes('past_events') || (location.state as any)?.from === 'past_events';
@@ -67,12 +76,19 @@ const EventDetail: React.FC = () => {
               <div className="absolute inset-0 bg-gradient-to-t from-kagura-card to-transparent" />
             </div>
           )}
-          
+
           <div className="p-6 md:p-10">
             <div className="mb-10 border-l-4 border-kagura-red pl-6">
-              <h1 className="text-3xl md:text-4xl font-black text-kagura-text leading-tight mb-2 tracking-tight">
-                {event.eventName || event.groupName}
-              </h1>
+              <div className="flex flex-wrap items-center gap-3 mb-2">
+                <h1 className="text-3xl md:text-4xl font-black text-kagura-text leading-tight tracking-tight">
+                  {event.eventName || event.groupName}
+                </h1>
+                {isPast && (
+                  <span className="px-3 py-1 bg-kagura-red text-white text-xs font-bold rounded-sm shadow-[0_0_15px_rgba(185,28,28,0.4)]">
+                    公演終了
+                  </span>
+                )}
+              </div>
               {event.eventName && (
                 <p className="text-xl text-kagura-gold font-bold tracking-widest">{event.groupName}</p>
               )}
