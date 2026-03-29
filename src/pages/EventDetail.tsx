@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import { Calendar, MapPin, Clock, Info, Banknote, ClipboardList, ArrowLeft, X, Users, Phone } from 'lucide-react';
 import { useEventData } from '../../useCsvData';
 
@@ -18,10 +18,15 @@ const getDirectDriveUrl = (url: string, size: number = 1000): string => {
 
 const EventDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const location = useLocation();
   const { events, loading, error: fetchError, refresh } = useEventData();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const event = events.find(e => String(e.id) === id);
+
+  // Determine back link destination
+  const isFromPast = location.pathname.includes('past_events') || (location.state as any)?.from === 'past_events';
+  const backLink = isFromPast ? "/past_events" : "/event_list";
 
   if (loading) return <div className="flex justify-center items-center h-screen text-kagura-red bg-kagura-black">読み込み中...</div>;
   if (fetchError) {
@@ -45,7 +50,7 @@ const EventDetail: React.FC = () => {
   return (
     <div className="bg-kagura-black min-h-screen">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <Link to="/event_list" className="inline-flex items-center text-kagura-gold hover:text-yellow-600 mb-8 transition-colors font-bold tracking-widest text-sm">
+        <Link to={backLink} className="inline-flex items-center text-kagura-gold hover:text-yellow-600 mb-8 transition-colors font-bold tracking-widest text-sm">
           <ArrowLeft className="w-4 h-4 mr-2" />
           一覧に戻る
         </Link>

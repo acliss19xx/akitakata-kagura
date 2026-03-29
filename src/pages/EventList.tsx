@@ -109,9 +109,9 @@ const EventList: React.FC = () => {
         }
 
         return true;
-      })
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  }, [events, selectedGroups, selectedMonth]);
+        })
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        }, [events, selectedGroups, selectedMonth]);
 
   if (loading) return <div className="flex justify-center items-center h-screen text-kagura-red bg-kagura-black">読み込み中...</div>;
   if (error) {

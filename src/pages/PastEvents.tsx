@@ -124,7 +124,11 @@ const PastEvents: React.FC = () => {
                       </div>
                     </td>
                     <td className="py-4 px-4 font-bold text-base">
-                      <Link to={`/event_detail/${event.id}`} className="hover:text-kagura-gold transition-colors">
+                      <Link 
+                        to={`/event_detail/${event.id}`} 
+                        state={{ from: 'past_events' }}
+                        className="hover:text-kagura-gold transition-colors"
+                      >
                         {event.eventName}
                       </Link>
                     </td>
