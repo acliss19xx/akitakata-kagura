@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, FilterX } from 'lucide-react';
 import { useEventData } from '../../useCsvData';
@@ -36,7 +36,7 @@ const PastEvents: React.FC = () => {
       .filter(event => {
         const eventDate = new Date(event.date);
         const isPast = !isNaN(eventDate.getTime()) && eventDate < today && eventDate >= oneYearAgo;
-        
+
         if (!isPast) return false;
 
         // Apply multiple group filter
@@ -90,7 +90,7 @@ const PastEvents: React.FC = () => {
                 {group}
               </span>
             ))}
-            <button 
+            <button
               onClick={resetFilters}
               className="ml-auto text-xs text-kagura-muted hover:text-white underline underline-offset-4"
             >
@@ -124,8 +124,8 @@ const PastEvents: React.FC = () => {
                       </div>
                     </td>
                     <td className="py-4 px-4 font-bold text-base">
-                      <Link 
-                        to={`/event_detail/${event.id}`} 
+                      <Link
+                        to={`/event_detail/${event.id}`}
                         state={{ from: 'past_events' }}
                         className="hover:text-kagura-gold transition-colors"
                       >
