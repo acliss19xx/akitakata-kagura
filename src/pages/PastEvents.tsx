@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, FilterX } from 'lucide-react';
-import { useEventData } from '../../useCsvData';
+import { useEventData } from '../../useJsonData';
 import { useFilter } from '../context/FilterContext';
 
 /**

@@ -5,7 +5,7 @@ import EventList from './pages/EventList';
 import EventDetail from './pages/EventDetail';
 import PastEvents from './pages/PastEvents';
 import { FilterProvider, useFilter } from './context/FilterContext';
-import { useEventData } from '../useCsvData';
+import { useEventData } from '../useJsonData';
 
 const KAGURA_GROUPS = [
   "青神楽団", "上河内神楽団", "梶矢神楽団", "来女木神楽団",

@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useParams, Link, useLocation } from 'react-router-dom';
 import { Calendar, MapPin, Clock, Info, Banknote, ClipboardList, ArrowLeft, X, Users, Phone } from 'lucide-react';
-import { useEventData } from '../../useCsvData';
+import { useEventData } from '../../useJsonData';
 
 /**
  * Converts Google Drive sharing links to direct image links
