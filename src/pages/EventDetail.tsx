@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useParams, Link, useLocation } from 'react-router-dom';
 import { Calendar, MapPin, Clock, Info, Banknote, ClipboardList, ArrowLeft, X, Users, Phone, Facebook, Twitter, Instagram, Share2, Link2 } from 'lucide-react';
 import { useEventData } from '../../useJsonData';
+import SEO from '../components/SEO';
 
 /**
  * Converts Google Drive sharing links to direct image links
@@ -56,8 +57,17 @@ const EventDetail: React.FC = () => {
   const images = event.imageUrl;
   const headerImage = event.headerImageUrl || (images.length > 0 ? images[0] : null);
 
+  const eventTitle = event.eventName || event.groupName;
+  const eventDate = new Date(event.date).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
+  const seoDescription = `${eventDate}、${event.location}にて開催される「${eventTitle}」の詳細情報です。出演：${event.groupName}、演目：${event.program || "情報なし"}`;
+
   return (
     <div className="bg-kagura-black min-h-screen">
+      <SEO
+        title={eventTitle}
+        description={seoDescription}
+        image={headerImage ? getDirectDriveUrl(headerImage, 1200) : undefined}
+      />
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <Link to={backLink} className="inline-flex items-center text-kagura-gold hover:text-yellow-600 mb-8 transition-colors font-bold tracking-widest text-sm">
           <ArrowLeft className="w-4 h-4 mr-2" />
@@ -185,7 +195,7 @@ const EventDetail: React.FC = () => {
                       <Info className="w-5 h-5 text-kagura-red" />
                     </div>
                     <div>
-                      <p className="text-xs text-kagura-muted font-bold tracking-widest mb-1 uppercase">開催条件</p>
+                      <p className="text-xs text-kagura-muted font-bold tracking-widest mb-1 uppercase">チケット代</p>
                       <p className="text-kagura-text text-base">{event.conditions}</p>
                     </div>
                   </div>
@@ -196,7 +206,7 @@ const EventDetail: React.FC = () => {
             <div className="mt-12 pt-10 border-t border-white/5">
               <h3 className="text-lg font-bold mb-4 text-kagura-gold tracking-widest uppercase flex items-center gap-3">
                 <span className="w-8 h-px bg-kagura-gold/30"></span>
-                備考
+                詳細
                 <span className="w-8 h-px bg-kagura-gold/30"></span>
               </h3>
               <p className="text-kagura-text text-base leading-relaxed whitespace-pre-wrap mb-8 bg-white/5 p-6 border-l-2 border-kagura-gold/30">

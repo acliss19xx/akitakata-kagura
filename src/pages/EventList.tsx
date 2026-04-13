@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ChevronRight, FilterX } from 'lucide-react';
 import { useEventData } from '../../useJsonData';
 import { useFilter } from '../context/FilterContext';
+import SEO from '../components/SEO';
 
 /**
  * Converts Google Drive sharing links to direct image links
@@ -130,6 +131,13 @@ const EventList: React.FC = () => {
 
   return (
     <div className="bg-kagura-black min-h-screen py-12">
+      <SEO 
+        title={
+          selectedMonth || selectedGroups.length > 0
+            ? `${selectedMonth ? selectedMonth.replace('-', '年') + '月 ' : ''}${selectedGroups.length > 0 ? selectedGroups.join('・') : ''} のイベント`
+            : "開催予定一覧"
+        }
+      />
       <div className="container mx-auto px-4 max-w-6xl">
         {/* Active Filters Display */}
         {(selectedGroups.length > 0 || selectedMonth) && (
